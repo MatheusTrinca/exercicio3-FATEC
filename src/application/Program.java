@@ -5,12 +5,15 @@ package application;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
 public class Program {
+	
+	/* ----- METODOS AUXILIARES ----- */
 	
 	public static int menu() {
 		Scanner sc = new Scanner(System.in);
@@ -24,10 +27,11 @@ public class Program {
 							  +"3.Consulta por determinada despesa\n"
 							  +"4.Imprimir total de despesas\n"
 							  +"5.Imprimir despesas por categoria\n"
-							  +"6.Finalizar");
+							  +"6.Remover despesa\n"
+							  +"7.Finalizar");
 			System.out.println("=================================");
 			op = sc.nextInt();
-			if (op < 1 || op > 6) {
+			if (op < 1 || op > 7) {
 				System.out.println("Valor Digitado inválido - Digite Novamente");
 				System.out.println();
 			}
@@ -45,10 +49,10 @@ public class Program {
 								  +"   ===============\n");
 				opSub = sc.next().toLowerCase().charAt(0);
 				if(opSub == 'a') {
-					op = 7;
+					op = 8;
 					break;
 				}else if(opSub == 'b') {
-					op = 8;
+					op = 9;
 					break;
 				}else {
 					System.out.println("Valor Digitado inválido - Digite Novamente");
@@ -70,7 +74,7 @@ public class Program {
 	public static double getTotalCategoria(List<Despesa> despesas, String categoria) {
 		double soma = 0;
 		for(Despesa despesa : despesas) {
-			if(despesa.getTipo().equals(categoria)) {
+			if(despesa.getTipo().equalsIgnoreCase(categoria)) {
 				soma += despesa.getValor();
 			}
 		}
@@ -86,7 +90,7 @@ public class Program {
 		for(Despesa despesa : despesas) {
 			for(int i = 0; i <= despesa.getDescricao().length() - tamanhoPalavra; i++) {
 				String sub = despesa.getDescricao().substring(i, (i+tamanhoPalavra));
-				if(sub.equals(palavra)) {
+				if(sub.equalsIgnoreCase(palavra)) {
 					achados.add(despesa);
 					break;
 				}
@@ -94,6 +98,42 @@ public class Program {
 		}
 		return achados;
 	}
+	
+	public static void imprimir(Despesa despesa) {
+		System.out.println(" ### DESPESA ###");
+		System.out.println(despesa);
+		
+	}
+	
+	public static boolean buscaDespesaId(List<Despesa> despesas, int id) {
+		for(Despesa despesa : despesas) {
+			if(despesa.getCodigo() == id) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean buscaDespesaTipo(List<Despesa> despesas, String tipo) {
+		for(Despesa despesa : despesas) {
+			if(despesa.getTipo().equalsIgnoreCase(tipo)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static List<Despesa> excluir(List<Despesa> despesas, int codRemocao){
+		for(Despesa despesa : despesas) {
+			if(despesa.getCodigo() == codRemocao) {
+				despesas.remove(despesa);
+				return despesas;
+			}
+		}
+		return despesas;
+	}
+	
+	/*------ MAIN ------*/
 
 	
 	public static void main(String[] args) throws ParseException {
@@ -121,8 +161,10 @@ public class Program {
 					Date data = sdf.parse(sc.next());
 					despesas.add(new Despesa(idDespesa, descricao, tipo, valor, data));
 					idDespesa ++;
-					System.out.println("Deseja novo cadastro? (S/N)");
+					System.out.print("Deseja novo cadastro? (S/N)");
 					char novo = sc.next().toLowerCase().charAt(0);
+					System.out.println();
+					sc.nextLine();
 					if(novo == 'n') 
 						break;
 				}
@@ -130,8 +172,7 @@ public class Program {
 			case 2:
 				if(!despesas.isEmpty()) {
 					for(Despesa despesa : despesas) 
-						System.out.println(despesa);
-						sc.nextLine();
+						imprimir(despesa);
 				}else {
 					System.out.println("Cadastre ao menos 1 despesa");
 				}
@@ -156,7 +197,7 @@ public class Program {
 					double total = getTotalCategoria(despesas, categoria);
 					if(total == 0) {
 						System.out.println("Não existem despesas ou a categoria selecionada é inválida");
-						sc.nextLine();
+
 					}else
 						System.out.println("Total de despesas de "+categoria+" R$"+String.format("%.2f",total));
 						sc.nextLine();
@@ -167,7 +208,51 @@ public class Program {
 				System.out.println("Aperter quaquer caractere para voltar ao menu inicial");
 				sc.nextLine();
 				break;
-			case 7:
+			case 6:
+				if(!despesas.isEmpty()) {
+					while(!despesas.isEmpty()) {
+						for(Despesa despesa : despesas) {
+							imprimir(despesa);
+						}
+						System.out.println();
+						System.out.println("Digite o código da despesa a ser removida");
+						int codRemocao = sc.nextInt();
+													
+						if(buscaDespesaId(despesas, codRemocao)) {
+							excluir(despesas, codRemocao);
+							System.out.println("Despesa removida");
+							System.out.println();
+						}else {
+							System.out.println("Despesa não encontrada");
+							System.out.println();
+						}
+						
+						if(despesas.isEmpty()) {
+							System.out.println("Todas s despesas foram excluídas");
+							System.out.println();
+							break;
+						}
+							
+						for(Despesa despesa : despesas) {
+							imprimir(despesa);
+						}
+						System.out.println("Deseja nova exclusão? (S/N): ");
+						int opEx = sc.next().toLowerCase().charAt(0);
+						if(opEx == 'n') {
+							sc.nextLine();
+							break;
+						}
+					}
+					
+				}else{
+					System.out.println("Cadastre ao menos 1 despesa");
+				}
+				System.out.println();
+				System.out.println("Aperter quaquer caractere para voltar ao menu inicial");
+				sc.nextLine();
+				break;
+				
+			case 8:
 				if(!despesas.isEmpty()) {
 					String palavra;
 					while(true) {
@@ -183,6 +268,7 @@ public class Program {
 					}
 					if(buscaPalavra(despesas, palavra).isEmpty()) {
 						System.out.println("Não foram achadas descrições relacionadas");
+						sc.nextLine();
 					}else {
 						System.out.println("Despesas encontradas");
 						for(Despesa despesa : buscaPalavra(despesas, palavra)) {
@@ -198,13 +284,13 @@ public class Program {
 				System.out.println("Aperter quaquer caractere para voltar ao menu inicial");
 				sc.nextLine();
 				break;
-			case 8:
+			case 9:
 				/* MOSTRAR OS OBJETOS da categoria/tipo que a pessoa digitar
 				 * AQUI VC PERGUNTA
 				 * */
 				
 			}
-		}while(op != 6);
+		}while(op != 7);
 		
 		System.out.println("FIM");
 

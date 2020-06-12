@@ -58,7 +58,11 @@ public class Despesa {
 	}
 
 	public String toString() {
-		return codigo+", "+sdf.format(data)+", "+descricao+", "+tipo+", R$"+String.format("%.2f", valor);
+		return "Código: "+codigo+"\n"
+			   +"Data: "+sdf.format(data)+"\n"
+			   +"Descrição: "+descricao+"\n"
+			   +"Tipo: "+tipo+"\n"
+			   +"Valor: R$"+String.format("%.2f", valor)+"\n";
 	}
 	
 }
