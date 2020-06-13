@@ -10,10 +10,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public class Program {
 	
-	/* ----- METODOS AUXILIARES ----- */
+	             /* ----- METODOS AUXILIARES ----- */
 	
 	public static int menu() {
 		Scanner sc = new Scanner(System.in);
@@ -27,11 +29,12 @@ public class Program {
 							  +"3.Consulta por determinada despesa\n"
 							  +"4.Imprimir total de despesas\n"
 							  +"5.Imprimir despesas por categoria\n"
-							  +"6.Remover despesa\n"
-							  +"7.Finalizar");
+							  +"6.Ordenar despesas por maior valor\n"
+							  +"7.Remover despesa\n"
+							  +"8.Finalizar");
 			System.out.println("=================================");
 			op = sc.nextInt();
-			if (op < 1 || op > 7) {
+			if (op < 1 || op > 8) {
 				System.out.println("Valor Digitado inválido - Digite Novamente");
 				System.out.println();
 			}
@@ -45,14 +48,14 @@ public class Program {
 				System.out.println("3.Consulta por determinada despesa\n"
 								  +"   ===============\n"
 								  +"   a.Por descrição\n"
-								  +"   b.Por tipo\n"
+								  +"   b.Por tipo/categoria\n"
 								  +"   ===============\n");
 				opSub = sc.next().toLowerCase().charAt(0);
 				if(opSub == 'a') {
-					op = 8;
+					op = 9;
 					break;
 				}else if(opSub == 'b') {
-					op = 9;
+					op = 10;
 					break;
 				}else {
 					System.out.println("Valor Digitado inválido - Digite Novamente");
@@ -81,9 +84,9 @@ public class Program {
 		return soma;
 	}
 	
-	// Busca na descrição do objeto a palavra digitada no menu, e retorna a despesa, se encontrada.
-	// Considerando que a descrição seja um breve texto, frase ou palavra.
 	public static List<Despesa> buscaPalavra(List<Despesa> despesas, String palavra) {
+		/* Busca na descrição do objeto a palavra digitada no menu, e retorna a despesa, se encontrada.
+		   Considerando que a descrição seja um breve texto, frase ou palavra.*/
 		List<Despesa> achados = new ArrayList<>();
 		int tamanhoPalavra = palavra.length();
 		
@@ -94,6 +97,16 @@ public class Program {
 					achados.add(despesa);
 					break;
 				}
+			}
+		}
+		return achados;
+	}
+	
+	public static List<Despesa> buscaDespesa(List<Despesa> despesas, String tipo){
+		List<Despesa> achados = new ArrayList<>();
+		for(Despesa despesa : despesas) {
+			if(despesa.getTipo().equals(tipo)) {
+				achados.add(despesa);
 			}
 		}
 		return achados;
@@ -114,15 +127,6 @@ public class Program {
 		return false;
 	}
 	
-	public static boolean buscaDespesaTipo(List<Despesa> despesas, String tipo) {
-		for(Despesa despesa : despesas) {
-			if(despesa.getTipo().equalsIgnoreCase(tipo)) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	public static List<Despesa> excluir(List<Despesa> despesas, int codRemocao){
 		for(Despesa despesa : despesas) {
 			if(despesa.getCodigo() == codRemocao) {
@@ -133,7 +137,16 @@ public class Program {
 		return despesas;
 	}
 	
-	/*------ MAIN ------*/
+	public static void voltar() {
+		/* Aguarda entrada do usuário para retorno ao menu*/
+		Scanner sc = new Scanner(System.in);
+		System.out.println();
+		System.out.println("Aperte qualquer tecla para voltar ao menu inicial");
+		sc.nextLine();
+		
+	}
+	
+	                    /*------ MAIN ------*/
 
 	
 	public static void main(String[] args) throws ParseException {
@@ -176,9 +189,7 @@ public class Program {
 				}else {
 					System.out.println("Cadastre ao menos 1 despesa");
 				}
-				System.out.println();
-				System.out.println("Aperte qualquer tecla para voltar ao menu inicial");
-				sc.nextLine();
+				voltar();
 				break;
 			case 4:
 				if(!despesas.isEmpty()) {
@@ -186,9 +197,7 @@ public class Program {
 				}else {
 					System.out.println("Cadastre ao menos 1 despesa");
 				}
-				System.out.println();
-				System.out.println("Aperter quaquer caractere para voltar ao menu inicial");
-				sc.nextLine();
+				voltar();
 				break;
 			case 5:
 				if(!despesas.isEmpty()) {
@@ -204,11 +213,24 @@ public class Program {
 				}else {
 					System.out.println("Cadastre ao menos 1 despesa");
 				}
-				System.out.println();
-				System.out.println("Aperter quaquer caractere para voltar ao menu inicial");
-				sc.nextLine();
+				voltar();
 				break;
+				
 			case 6:
+				if(!despesas.isEmpty()) {
+					List<Despesa> ordenado = new ArrayList<>();
+					ordenado.addAll(despesas);
+					Collections.sort(ordenado);
+					for(Despesa despesa : ordenado) {
+						imprimir(despesa);
+					}
+				}else {
+					System.out.println("Cadastre ao menos 1 despesa");
+				}
+				voltar();
+				break;
+
+			case 7:
 				if(!despesas.isEmpty()) {
 					while(!despesas.isEmpty()) {
 						for(Despesa despesa : despesas) {
@@ -243,31 +265,27 @@ public class Program {
 							break;
 						}
 					}
-					
 				}else{
 					System.out.println("Cadastre ao menos 1 despesa");
 				}
-				System.out.println();
-				System.out.println("Aperter quaquer caractere para voltar ao menu inicial");
-				sc.nextLine();
+				voltar();
 				break;
-				
-			case 8:
+			case 9:
 				if(!despesas.isEmpty()) {
 					String palavra;
 					while(true) {
-						// considera palavras acima de 4 letras;
+						// considera palavras acima de 3 letras;
 						System.out.println("Digite uma palavra para a busca");
 						palavra = sc.next();
 						int tamanhoPalavra = palavra.length();
-						if(tamanhoPalavra < 4) {
-							System.out.println("Palavra inválida, digite palavras com o minimo de 4 caracteres");
+						if(tamanhoPalavra < 3) {
+							System.out.println("Palavra inválida, digite palavras com o minimo de 3 caracteres");
 						}else {
 							break;
 						}
 					}
 					if(buscaPalavra(despesas, palavra).isEmpty()) {
-						System.out.println("Não foram achadas descrições relacionadas");
+						System.out.println("Não foram achadas despesas relacionadas");
 						sc.nextLine();
 					}else {
 						System.out.println("Despesas encontradas");
@@ -280,22 +298,27 @@ public class Program {
 				}else {
 					System.out.println("Cadastre ao menos 1 despesa");
 				}
-				System.out.println();
-				System.out.println("Aperter quaquer caractere para voltar ao menu inicial");
-				sc.nextLine();
+				voltar();
 				break;
-			case 9:
-				/* MOSTRAR OS OBJETOS da categoria/tipo que a pessoa digitar
-				 * AQUI VC PERGUNTA
-				 * */
-				
+			case 10:
+				if(!despesas.isEmpty()) {
+					System.out.println("Digite o Tipo/Categoria de despesa");
+					String tipo = sc.next();
+					if(!buscaDespesa(despesas, tipo).isEmpty()) {
+						for(Despesa despesa : buscaDespesa(despesas, tipo)) {
+							imprimir(despesa);
+						}
+					}else {
+						System.out.println("Não foram achadas despesas relacionadas");
+					}
+				}else {
+					System.out.println("Cadastre ao menos 1 despesa");
+				}
+				voltar();
+				break;
 			}
-		}while(op != 7);
+		}while(op != 8);
 		
 		System.out.println("FIM");
-
-		
-
 	}
-
 }

@@ -3,7 +3,7 @@ package application;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Despesa {
+public class Despesa implements Comparable<Despesa> {
 	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	private int codigo;
@@ -57,6 +57,7 @@ public class Despesa {
 		return data;
 	}
 
+	@Override
 	public String toString() {
 		return "Código: "+codigo+"\n"
 			   +"Data: "+sdf.format(data)+"\n"
@@ -64,5 +65,10 @@ public class Despesa {
 			   +"Tipo: "+tipo+"\n"
 			   +"Valor: R$"+String.format("%.2f", valor)+"\n";
 	}
-	
+
+	@Override
+	public int compareTo(Despesa outro) {
+		return -valor.compareTo(outro.getValor());
+	}
+
 }
